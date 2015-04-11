@@ -39,7 +39,15 @@ complete <- function(directory, id = 1:332) {
     good <- complete.cases(complete_cases)
     valids <- complete_cases[good,]
     colnames(valids) <- c("id", "nobs")
-    rownames(valids)<- c(1:dim(valids)[[1]])
     
-    valids
+    output = valids
+    if(id[[1]] > id[[2]]) {
+      output = valids[order(-valids[1]),]
+    } else {
+      output = valids[order(valids[1]),]
+    }
+    
+    
+    rownames(output)<- c(1:dim(output)[[1]])
+    output
 }
