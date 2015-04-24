@@ -1,4 +1,6 @@
 best <- function(state, outcome) {
+    library(data.table)
+    
     outcome <- tolower(outcome)
     ## Read outcome data
     care_measures <- read.csv("./data/outcome-of-care-measures.csv", na.strings="Not Available")
@@ -16,14 +18,7 @@ best <- function(state, outcome) {
     
     measures_for_a_state <- care_measures[which(care_measures$State == state),]
     
-    outcome_names <- c("Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack",
-        "Hospital.30.Day.Death..Mortality..Rates.from.Heart.Failure",
-        "Hospital.30.Day.Death..Mortality..Rates.from.Pneumonia")
-    
-    
-    valid_measures <- measures_for_a_state[, outcome_names]
-    best <- data.frame()
-    best[,1] <- measures_for_a_state$Hospital.Name
+    best <- data.table(lapply(measures_for_a_state$Hospital.Name, as.character, stringsAsFactor=FALSE))
     
     if(outcome == "heart attack") {
         best$mortality <- measures_for_a_state$Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack        
@@ -34,20 +29,11 @@ best <- function(state, outcome) {
         
         
     } else {
-        best <- measures_for_a_state$Hospital.30.Day.Death..Mortality..Rates.from.Pneumonia
+        best$mortality <- measures_for_a_state$Hospital.30.Day.Death..Mortality..Rates.from.Pneumonia
         
     }
-    best
-    #clean_data <- complete_cases[best]
+    result <- best[which.min(best$mortality)]
+    as.character(result[,V1])
     
-    #max <- max(as.numeric(measures_for_a_state[,1], rm.na=T))
-    
-    
-    #max
-    
-    ## valid_states <- outcome[state == states]
-    
-    ## Return hospital name in that state with lowest 30-day death
-    ## rate
     
 }
