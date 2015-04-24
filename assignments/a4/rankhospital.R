@@ -1,4 +1,5 @@
-best <- function(state, outcome) {
+rankhospital <- function(state, outcome, num="best") {
+    
     library(data.table)
     
     outcome <- tolower(outcome)
@@ -32,11 +33,22 @@ best <- function(state, outcome) {
         best$mortality <- measures_for_a_state$Hospital.30.Day.Death..Mortality..Rates.from.Pneumonia
         
     }
-    result <- best[which.min(best$mortality)]
-    as.character(result[,V1])
+    best <- best[complete.cases(best$mortality), ]
+    result <- best[order(best$mortality, best[,1]),]
     
+    if(num == "worst")
+        num <- dim(result)[1]
     
+    if(num == "best")
+        num = 1
+    
+    output <- NA
+    if(num <= dim(result)[[1]])
+        output <- as.character(result[[1]][num])
+    
+    output
+    
+   
 }
 
 
- 
