@@ -6,12 +6,6 @@ rankall <- function(outcome, num = "best") {
     ## Read outcome data
     care_measures <- read.csv("./data/outcome-of-care-measures.csv", na.strings="Not Available")
     
-    ## Check that sate and outcome are valid
-    ##states <- care_measures$State
-    ## Is state is in states
-    ##if(sum(as.numeric(care_measures$State[state == care_measures$State])) == 0 )
-      ##  stop("invalid state")
-    
     outcomes <- c("heart attack", "heart failure", "pneumonia")
     
     if(sum(as.numeric(outcome == outcomes)) == 0 )
@@ -37,21 +31,33 @@ rankall <- function(outcome, num = "best") {
     
     best <- best[complete.cases(best$mortality), ]
     state_list <- sort(unique(best$State))
-    output <- data.frame(state = state_list)
-    rownames(output) <- state_list
-
+    
     res <- split(best, best$State)
     
+    xx <- matrix(nrow = length(state_list), ncol = 2)
+    
+    check_dim <- dim(data.table())
+    
     for(i in 1:length(res)) {
-        output[res[1], "hospital"] <- rank(res[[i]])
+        
+        hospital_name <- rank(res[[i]], num)
+        if(!identical(dim(hospital_name), check_dim)) {
+            hospital <- as.data.table(hospital_name)
+            xx[i, 1] <- as.character(hospital[1, State])
+            xx[i, 2] <- as.character(hospital[1, hospital])
+        } else {
+            xx[i, 1] <- state_list[[i]]
+            xx[i, 2] <- NA
+        }
     }
     
-    output
-    
+    yy <- data.frame(hospital = xx[,2], state = state_list)
+    rownames(yy) <- state_list
+    yy
 }
 
-rank <- function(best) {
-    result <- best[order(best$mortality),]
+rank <- function(best, num) {
+     result <- best[order(best$mortality, best[,1]),]
     
     if(num == "worst")
         num <- dim(result)[1]
@@ -59,11 +65,12 @@ rank <- function(best) {
     if(num == "best")
         num = 1
     
-    output <- NA
+    output <- data.table()
     if(num <= dim(result)[[1]])
-        output <- as.character(result[[1]][num])
-    
+        output <- result[num]
     output
+    
+    
 }
 
 
